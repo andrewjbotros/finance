@@ -33,6 +33,10 @@ class Finance
 	def ei
 		@ei = EI.new(@income)
 	end
+
+	def greeting
+		puts "Hello #{@firstName} #{@lastName}, age #{@age} from #{@province}. You make #{@income}. Good job!"
+	end
 	
 end
 
@@ -55,7 +59,7 @@ class TFSA
 				year -= 1
 				count -= 1
 			end
-			puts "You can contribute #{contributionRoom} to your TFSA."
+			print "You can contribute #{contributionRoom} to your TFSA."
 		end
 	end
 end
@@ -66,23 +70,20 @@ class EI
 		@income = income
 	end
 
-	def employmentInsurance (income)
+	def contributions
 		premium = 0
-		if income < 47400
-			premium = income*0.0188
+		if @income < 47400
+			premium = @income*0.0188
 		else
 			premium = 47400*0.0188
 		end
-		puts "You will contribute #{premium} to Employment Insurance."
+		print "You will contribute #{premium} to Employment Insurance."
 	end
 
 end
 
 User = Finance.new("Andrew", "Botros", "28", "Ontario", 35000)
-puts User.firstName
-puts User.lastName
-puts User.age
-puts User.province
-puts ""
+puts User.greeting
 puts User.tfsa.room
+puts User.ei.contributions
 
