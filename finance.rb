@@ -67,25 +67,22 @@ class EI
 	end
 
 	def employmentInsurance (income)
+		premium = 0
 		if income < 47400
-			return income*0.0188
+			premium = income*0.0188
 		else
-			return 47400*0.0188
+			premium = 47400*0.0188
 		end
+		puts "You will contribute #{premium} to Employment Insurance."
 	end
 
-#Display: Computing EI Premium
-	def employmentInsuranceDisplay
-		puts "Enter your income: "
-		income = gets.strip.to_f
-		puts "Your EI premium contribution is: #{employmentInsurance(income)}"
-	end
 end
 
 User = Finance.new("Andrew", "Botros", "28", "Ontario", 35000)
+puts User.firstName
+puts User.lastName
 puts User.age
 puts User.province
-puts User.lastName
-puts User.firstName
+puts ""
 puts User.tfsa.room
 
