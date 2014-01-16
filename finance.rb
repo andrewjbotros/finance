@@ -20,6 +20,9 @@ require 'Time'
 #           ##############                             ###############
 #           ##########################################################
 
+#                        SET FORMAT PARAMETERS, CURRENT YEAR    
+#           ##########################################################
+
 @@width = 50
 @@indent = 3
 @@header = (@@width*6/20).to_i
@@ -48,13 +51,34 @@ require 'Time'
 @@cppYMPE["2014"] = 52500
 @@cppYMPE["2013"] = 51100
 @@cppYMPE["2012"] = 50100
+@@cppYMPE["2011"] = 48300
+@@cppYMPE["2010"] = 47200
+@@cppYMPE["2009"] = 46300
+@@cppYMPE["2008"] = 44900
+@@cppYMPE["2007"] = 43700
+@@cppYMPE["2006"] = 42100
+@@cppYMPE["2005"] = 41100
+@@cppYMPE["2004"] = 40500
+@@cppYMPE["2003"] = 39900
+@@cppYMPE["2002"] = 39100
+@@cppYMPE["2001"] = 38300
+@@cppYMPE["2000"] = 37600
+@@cppYMPE["1999"] = 37400
+@@cppYMPE["1998"] = 36900
+@@cppYMPE["1997"] = 35800
+@@cppYMPE["1996"] = 35400
+@@cppYMPE["1995"] = 34900
+@@cppYMPE["1994"] = 34400
+@@cppYMPE["1993"] = 33400
+@@cppYMPE["1992"] = 32200
+@@cppYMPE["1991"] = 30500
+@@cppYMPE["1990"] = 28900
 
 #                   REGISTERED RETIREMENT SAVINGS PLAN (RRSP)   
 #           ##########################################################
 
 @@rrspMax = {}
-
-@@rrspMax["2013"] = 24270
+@@rrspMax["2014"] = 24270
 @@rrspMax["2013"] = 23820
 
 @@rrspRate = {}
@@ -109,7 +133,7 @@ require 'Time'
 
 #           ##########################################################
 #           ##############                             ###############
-#           ##############   CREATE NECESSARY OBJECTS  ###############
+#           ##############         CREATE STUFF        ###############
 #           ##############                             ###############
 #           ##########################################################
 
@@ -147,30 +171,80 @@ class Finance
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
 		print " "*@@indent + "Tax (Provincial): $#{@ei.premium.round}\n"
 		print " "*@@indent + "Tax (Federal): $#{@income.round}\n"
-		print " "*@@indent + "Total($): $#{@income.round}\n"
+		print " "*@@indent + "Total: $#{@income.round}\n"
 		print "-"*@@width + "\n"
 	end
 
 	def registeredSavings
-		print " "*@@header + "ELIGIBLE CONTRIBUTIONS\n"
+		print " "*@@header + "REGISTERED SAVINGS\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "RRSP Contributions: #{@cpp.premium}\n"
-		print " "*@@indent + "EI Premiums: #{@ei.premium}\n"
-		print " "*@@indent + "Tax (Provincial): #{@province}\n"
-		print " "*@@indent + "Tax (Federal): #{@income}\n"
-		print " "*@@indent + "Total($): #{@income}\n"
+		print " "*@@indent + "RRSP Contributions: $#{@rrsp.contribution.round}\n"
+		print " "*@@indent + "TFSA Contributions: $#{@tfsa.contribution.round}\n"
+		print " "*@@indent + "Total: $#{@income}\n"
 		print "-"*@@width + "\n"
 	end
 	
 end
 
-class TFSA
+class CPP
+	def initialize (income)
+		@income = income
+	end
+	def premium
+		premium = 0
+		if @income < @@cppYMPE[@@currentYear]
+			premium = @income*@@cppRate[@@currentYear]
+		else
+			premium = @@cppYMPE[@@currentYear]*@@cppRate[@@currentYear]
+		end
+		return premium
+	end
+end
 
+class EI
+	def initialize (income)
+		@income = income
+	end
+	def premium
+		premium = 0
+		if @income < @@eiMax[@@currentYear]
+			premium = @income*@@eiRate[@@currentYear]
+		else
+			premium = @@eiMax[@@currentYear]*@@eiRate[@@currentYear]
+		end
+		return premium
+	end
+end
+
+class RRSP
+	def initialize (income)
+		@income = income
+	end
+	def contribution
+		contribution = 0
+		if @income*@@rrspRate[@@currentYear] < @@rrspMax[@@currentYear]
+			contribution = @income*@@rrspRate[@@currentYear]
+		else
+			contribution = @@rrspMax[@@currentYear]*@@rrspRate[@@currentYear]
+		end
+		return contribution
+	end
+end
+
+class TFSA
 	def initialize(age)
 		@age = age.to_i
 	end
 
-	def room
+	def contribution
+		if @age < 18
+			return 0
+		else
+			return @@tfsaAmount[@@currentYear.to_s]
+		end
+	end
+
+	def contributionTotal
 		contributionRoom = 0
 		count = @age
 		year = @@currentYear.to_i
@@ -188,69 +262,15 @@ class TFSA
 	end
 end
 
-class EI
-
-	def initialize (income)
-		@income = income
-	end
-
-	def premium
-		premium = 0
-		if @income < @@eiMax[@@currentYear]
-			premium = @income*@@eiRate[@@currentYear]
-		else
-			premium = @@eiMax[@@currentYear]*@@eiRate[@@currentYear]
-		end
-		return premium
-	end
-
-end
-
-class CPP
-
-	def initialize (income)
-		@income = income
-	end
-
-	def premium
-		premium = 0
-		if @income < @@cppYMPE[@@currentYear]
-			premium = @income*@@cppRate[@@currentYear]
-		else
-			premium = @@cppYMPE[@@currentYear]*@@cppRate[@@currentYear]
-		end
-		return premium
-	end
-
-end
-
-class RRSP
-
-	def initialize (income)
-		@income = income
-	end
-
-	def premium
-		contribution = 0
-		if @income < @@rrspMax[@@currentYear]
-			contribution = @income*@@rrspRate[@@currentYear]
-		else
-			contribution = @@rrspMax[@@currentYear]*@@rrspRate[@@currentYear]
-		end
-		return contribution
-	end
-
-end
-
 #           ##########################################################
-#           ##############                             ###############
 #           ##############        CREATE NEW USER      ###############
 #           ##############         PRINT RESULTS       ###############
-#           ##############                             ###############
+#           ##############           (testing)         ###############
 #           ##########################################################
 
 User = Finance.new("Peter", "Pan", "30", "Ontario", 80000)
 puts User.personalInfo
 puts User.payrollDeductions
+puts User.registeredSavings
 
 
