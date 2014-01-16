@@ -5,6 +5,7 @@
 #           ##########################################################
 
 require 'Time'
+require 'csv'
 
 #           ##########################################################
 #           ##############                             ###############
@@ -96,7 +97,7 @@ require 'Time'
 @@tfsaAmount["2010"] = 5000
 @@tfsaAmount["2009"] = 5000
 
-#                     PROVINCIAL AND FEDERAL INCOME TAXES    
+#                   PROVINCIAL AND FEDERAL INCOME TAX RATES   
 #           ##########################################################
 
 @@taxRates2013 = {}
@@ -105,7 +106,7 @@ require 'Time'
 @@taxRates2013["NS"] = [[8.79, 29590], [14.95, 29590],[16.67, 33820], [17.5, 57000], [21, 150000]]
 @@taxRates2013["NB"] = [[9.39, 38954], [13.46, 38954], [14.46, 48754], [16.07, 126662]]
 @@taxRates2013["QC"] = [[16, 41095], [20, 41095], [24, 17810], [25.75, 100000]]
-@@taxRates2013["ON"] = [[5.05, 39723], [9.15, 39725], [11.16, 429552], [13.16, 509000]]
+@@taxRates2013["ON"] = [[0.0505, 39723], [0.0915, 39725], [0.1116, 429552], [0.1316, 509000]]
 @@taxRates2013["MB"] = [[10.8, 31000],[12.75, 36000], [17.4, 67000]]
 @@taxRates2013["SK"] = [[11, 42906], [13, 79683], [15, 122589]]
 @@taxRates2013["AB"] = 10
@@ -232,16 +233,34 @@ class RRSP
 end
 
 class Taxes
+
 	def initialize(income, province)
 		@income = income
 		@province = province
 	end
 
 	def provincialTaxes
-		if @income < @@taxRates2013[@province][-1][1]
-			puts "Your income: #{@income}"
-			puts "Your max tax: #{@@taxRates2013[@province][-1][1]}"
+		incomeTax = 0
+		i = 0
+
+		if @income < @@taxBasic2013[@province]
+			return 0
+		else
+			while i < @@taxRates2013[@province].length
+				incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
+				i += 1
+			end
+		
+			return incomeTax
 		end
+
+
+			# while @income < @@taxRates2013[@province][-1][1]
+
+		# if @income < @@taxRates2013[@province][-1][1]
+		# 	puts "Your income: #{@income}"
+		# 	puts "Your max tax: #{@@taxRates2013[@province][-1][1]}"
+		# end
 	end
 
 	def federalTaxes
@@ -285,7 +304,7 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "30", "ON", 80000)
+User = Finance.new("Peter", "Pan", "30", "ON", 100000)
 puts User.personalInfo
 puts User.payrollDeductions
 puts User.registeredSavings
