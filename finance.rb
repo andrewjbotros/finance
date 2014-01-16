@@ -20,7 +20,7 @@ require 'Time'
 #           ##############                             ###############
 #           ##########################################################
 
-#                        SET FORMAT PARAMETERS, CURRENT YEAR    
+#                SET FORMAT PARAMETERS, CURRENT YEAR, PROVINCE ABBR.   
 #           ##########################################################
 
 @@width = 50
@@ -47,32 +47,32 @@ require 'Time'
 @@cppRate["2014"] = 0.0495
 @@cppRate["2013"] = 0.0495
 
-@@cppYMPE={}
-@@cppYMPE["2014"] = 52500
-@@cppYMPE["2013"] = 51100
-@@cppYMPE["2012"] = 50100
-@@cppYMPE["2011"] = 48300
-@@cppYMPE["2010"] = 47200
-@@cppYMPE["2009"] = 46300
-@@cppYMPE["2008"] = 44900
-@@cppYMPE["2007"] = 43700
-@@cppYMPE["2006"] = 42100
-@@cppYMPE["2005"] = 41100
-@@cppYMPE["2004"] = 40500
-@@cppYMPE["2003"] = 39900
-@@cppYMPE["2002"] = 39100
-@@cppYMPE["2001"] = 38300
-@@cppYMPE["2000"] = 37600
-@@cppYMPE["1999"] = 37400
-@@cppYMPE["1998"] = 36900
-@@cppYMPE["1997"] = 35800
-@@cppYMPE["1996"] = 35400
-@@cppYMPE["1995"] = 34900
-@@cppYMPE["1994"] = 34400
-@@cppYMPE["1993"] = 33400
-@@cppYMPE["1992"] = 32200
-@@cppYMPE["1991"] = 30500
-@@cppYMPE["1990"] = 28900
+@@YMPE={}
+@@YMPE["2014"] = 52500
+@@YMPE["2013"] = 51100
+@@YMPE["2012"] = 50100
+@@YMPE["2011"] = 48300
+@@YMPE["2010"] = 47200
+@@YMPE["2009"] = 46300
+@@YMPE["2008"] = 44900
+@@YMPE["2007"] = 43700
+@@YMPE["2006"] = 42100
+@@YMPE["2005"] = 41100
+@@YMPE["2004"] = 40500
+@@YMPE["2003"] = 39900
+@@YMPE["2002"] = 39100
+@@YMPE["2001"] = 38300
+@@YMPE["2000"] = 37600
+@@YMPE["1999"] = 37400
+@@YMPE["1998"] = 36900
+@@YMPE["1997"] = 35800
+@@YMPE["1996"] = 35400
+@@YMPE["1995"] = 34900
+@@YMPE["1994"] = 34400
+@@YMPE["1993"] = 33400
+@@YMPE["1992"] = 32200
+@@YMPE["1991"] = 30500
+@@YMPE["1990"] = 28900
 
 #                   REGISTERED RETIREMENT SAVINGS PLAN (RRSP)   
 #           ##########################################################
@@ -100,8 +100,8 @@ require 'Time'
 #           ##########################################################
 
 @@taxRates2013 = {}
-@@taxRates2013["NL"] = [[7.7, 33748], [12.5, 33748], [13.3, 67496]]
-@@taxRates2013["PE"] = [[9.8, 31984], [13.8, 31985], [16.7, 63969]]
+@@taxRates2013["NL"] = [[0.077, 33748], [0.125, 33748], [0.133, 67496]]
+@@taxRates2013["PE"] = [[0.098, 31984], [13.8, 31985], [16.7, 63969]]
 @@taxRates2013["NS"] = [[8.79, 29590], [14.95, 29590],[16.67, 33820], [17.5, 57000], [21, 150000]]
 @@taxRates2013["NB"] = [[9.39, 38954], [13.46, 38954], [14.46, 48754], [16.07, 126662]]
 @@taxRates2013["QC"] = [[16, 41095], [20, 41095], [24, 17810], [25.75, 100000]]
@@ -138,8 +138,7 @@ require 'Time'
 #           ##########################################################
 
 class Finance
-
-	attr_reader :firstName,:lastName,:age,:province,:income,:tfsa,:ei,:cpp,:rrsp
+	attr_reader :firstName,:lastName,:age,:province,:income,:tfsa,:ei,:cpp,:rrsp,:taxes
 
 	def initialize (firstName, lastName, age, province, income)
 		@firstName = firstName
@@ -151,6 +150,7 @@ class Finance
 		@ei = EI.new(@income)
 		@cpp = CPP.new(@income)
 		@rrsp = RRSP.new(@income)
+		@taxes = Taxes.new(@income, @province)
 	end
 
 	def personalInfo
@@ -169,8 +169,8 @@ class Finance
 		print "-"*@@width + "\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
-		print " "*@@indent + "Tax (Provincial): $#{@ei.premium.round}\n"
-		print " "*@@indent + "Tax (Federal): $#{@income.round}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@taxes.provincialTaxes}\n"
+		print " "*@@indent + "Tax (Federal): $#{@taxes.federalTaxes}\n"
 		print " "*@@indent + "Total: $#{@income.round}\n"
 		print "-"*@@width + "\n"
 	end
@@ -178,12 +178,11 @@ class Finance
 	def registeredSavings
 		print " "*@@header + "REGISTERED SAVINGS\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "RRSP Contributions: $#{@rrsp.contribution.round}\n"
-		print " "*@@indent + "TFSA Contributions: $#{@tfsa.contribution.round}\n"
+		print " "*@@indent + "RRSP Contribution: $#{@rrsp.contribution.round}\n"
+		print " "*@@indent + "TFSA Contribution: $#{@tfsa.contribution.round}\n"
 		print " "*@@indent + "Total: $#{@income}\n"
 		print "-"*@@width + "\n"
 	end
-	
 end
 
 class CPP
@@ -192,10 +191,10 @@ class CPP
 	end
 	def premium
 		premium = 0
-		if @income < @@cppYMPE[@@currentYear]
+		if @income < @@YMPE[@@currentYear]
 			premium = @income*@@cppRate[@@currentYear]
 		else
-			premium = @@cppYMPE[@@currentYear]*@@cppRate[@@currentYear]
+			premium = @@YMPE[@@currentYear]*@@cppRate[@@currentYear]
 		end
 		return premium
 	end
@@ -220,6 +219,7 @@ class RRSP
 	def initialize (income)
 		@income = income
 	end
+
 	def contribution
 		contribution = 0
 		if @income*@@rrspRate[@@currentYear] < @@rrspMax[@@currentYear]
@@ -228,6 +228,23 @@ class RRSP
 			contribution = @@rrspMax[@@currentYear]*@@rrspRate[@@currentYear]
 		end
 		return contribution
+	end
+end
+
+class Taxes
+	def initialize(income, province)
+		@income = income
+		@province = province
+	end
+
+	def provincialTaxes
+		if @income < @@taxRates2013[@province][-1][1]
+			puts "Your income: #{@income}"
+			puts "Your max tax: #{@@taxRates2013[@province][-1][1]}"
+		end
+	end
+
+	def federalTaxes
 	end
 end
 
@@ -268,7 +285,7 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "30", "Ontario", 80000)
+User = Finance.new("Peter", "Pan", "30", "ON", 80000)
 puts User.personalInfo
 puts User.payrollDeductions
 puts User.registeredSavings
