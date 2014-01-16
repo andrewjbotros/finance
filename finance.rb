@@ -8,15 +8,26 @@ require 'Time'
 
 #           ##########################################################
 #           ##############                             ###############
+#           ##############     LOAD RELEVANT FILES     ###############
+#           ##############                             ###############
+#           ##########################################################
+
+#require_relative 'Time'
+
+#           ##########################################################
+#           ##############                             ###############
 #           ##############     INPUT RELEVANT DATA     ###############
 #           ##############                             ###############
 #           ##########################################################
 
 @@width = 50
 @@indent = 3
-@@header = (@@width*1/4).to_i
+@@header = (@@width*6/20).to_i
 
 @@currentYear = Time::new.year.to_s
+
+#                            EMPLOYMENT INSURANCE (EI)    
+#           ##########################################################
 
 @@eiRate = {}
 @@eiRate["2014"] = 0.0188
@@ -26,14 +37,32 @@ require 'Time'
 @@eiMax["2014"] = 48600
 @@eiMax["2013"] = 47400
 
+#                           CANADA PENSION PLAN (CPP)     
+#           ##########################################################
+
 @@cppRate = {}
 @@cppRate["2014"] = 0.0495
 @@cppRate["2013"] = 0.0495
 
-@@cppMax={}
-@@cppMax["2014"] = 52500
-@@cppMax["2013"] = 51100
-@@cppMax["2012"] = 50100
+@@cppYMPE={}
+@@cppYMPE["2014"] = 52500
+@@cppYMPE["2013"] = 51100
+@@cppYMPE["2012"] = 50100
+
+#                   REGISTERED RETIREMENT SAVINGS PLAN (RRSP)   
+#           ##########################################################
+
+@@rrspMax = {}
+
+@@rrspMax["2013"] = 24270
+@@rrspMax["2013"] = 23820
+
+@@rrspRate = {}
+@@rrspRate["2014"] = 0.18
+@@rrspRate["2013"] = 0.18
+
+#                        TAX FREE SAVINGS ACCOUNT (TFSA)    
+#           ##########################################################
 
 @@tfsaAmount = {}
 @@tfsaAmount["2014"] = 5500
@@ -42,6 +71,9 @@ require 'Time'
 @@tfsaAmount["2011"] = 5000
 @@tfsaAmount["2010"] = 5000
 @@tfsaAmount["2009"] = 5000
+
+#                     PROVINCIAL AND FEDERAL INCOME TAXES    
+#           ##########################################################
 
 @@taxRates2013 = {}
 @@taxRates2013["NL"] = [[7.7, 33748], [12.5, 33748], [13.3, 67496]]
@@ -103,26 +135,26 @@ class Finance
 		print " "*@@indent + "Name: #{@firstName} #{@lastName}\n" 
 		print " "*@@indent + "Age: #{@age}\n"
 		print " "*@@indent + "Province: #{@province}\n"
-		print " "*@@indent + "Income: #{@income}\n"
+		print " "*@@indent + "Income: $#{@income}\n"
 		print "-"*@@width + "\n"
 	end
 
-	def payrollDeductions (decimals)
+	def payrollDeductions
 		decimals = decimals.to_i
 		print " "*@@header + "PAYROLL DEDUCTIONS\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "CPP Premiums: #{@cpp.premium.round(decimals)}\n"
-		print " "*@@indent + "EI Premiums: #{@ei.premium.round(decimals)}\n"
-		print " "*@@indent + "Tax (Provincial): #{@ei.premium.round(decimals)}\n"
-		print " "*@@indent + "Tax (Federal): #{@income.round(decimals)}\n"
-		print " "*@@indent + "Total($): #{@income.round(decimals)}\n"
+		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
+		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@ei.premium.round}\n"
+		print " "*@@indent + "Tax (Federal): $#{@income.round}\n"
+		print " "*@@indent + "Total($): $#{@income.round}\n"
 		print "-"*@@width + "\n"
 	end
 
 	def registeredSavings
-		print " "*@@header + "PAYROLL DEDUCTIONS\n"
+		print " "*@@header + "ELIGIBLE CONTRIBUTIONS\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "CPP Premiums: #{@cpp.premium}\n"
+		print " "*@@indent + "RRSP Contributions: #{@cpp.premium}\n"
 		print " "*@@indent + "EI Premiums: #{@ei.premium}\n"
 		print " "*@@indent + "Tax (Provincial): #{@province}\n"
 		print " "*@@indent + "Tax (Federal): #{@income}\n"
@@ -144,14 +176,14 @@ class TFSA
 		year = @@currentYear.to_i
 
 		if @age < 18
-			puts "Sorry, you must be 18 years of age to contribute to your TFSA."
+			return "Sorry, you must be 18 years of age to contribute to your TFSA."
 		else
 			while year >= 2009 && count >= 18
 				contributionRoom += @@tfsaAmount[year.to_s]
 				year -= 1
 				count -= 1
 			end
-			print "You can contribute #{contributionRoom} to your TFSA."
+			return contributionRoom
 		end
 	end
 end
@@ -182,10 +214,10 @@ class CPP
 
 	def premium
 		premium = 0
-		if @income < @@cppMax[@@currentYear]
+		if @income < @@cppYMPE[@@currentYear]
 			premium = @income*@@cppRate[@@currentYear]
 		else
-			premium = @@cppMax[@@currentYear]*@@cppRate[@@currentYear]
+			premium = @@cppYMPE[@@currentYear]*@@cppRate[@@currentYear]
 		end
 		return premium
 	end
@@ -219,6 +251,6 @@ end
 
 User = Finance.new("Peter", "Pan", "30", "Ontario", 80000)
 puts User.personalInfo
-puts User.payrollDeductions(3)
+puts User.payrollDeductions
 
 
