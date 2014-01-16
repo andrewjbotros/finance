@@ -5,14 +5,20 @@ require 'Time'
 @@currentYear = Time::new.year
 
 #The Tax Free Savings Account (TFSA) started in 2009 with contributions for anyone 18 and older capped at 5,000. In 2012, that was increased to 5,500
+
+@@eiMax={}
+@@eiMax["2014"] = 48600
+@@eiMax["2013"] = 47400
+
 @@tfsaAmount = {}
-@@tfsaAmount["2009"] = 5000
-@@tfsaAmount["2010"] = 5000
-@@tfsaAmount["2011"] = 5000
-@@tfsaAmount["2012"] = 5000
-@@tfsaAmount["2013"] = 5500
 @@tfsaAmount["2014"] = 5500
-#puts @@contributionRates
+@@tfsaAmount["2013"] = 5500
+@@tfsaAmount["2012"] = 5000
+@@tfsaAmount["2011"] = 5000
+@@tfsaAmount["2010"] = 5000
+@@tfsaAmount["2009"] = 5000
+
+
 
 class Finance
 
@@ -72,17 +78,17 @@ class EI
 
 	def contributions
 		premium = 0
-		if @income < 47400
+		if @income < @@eiMax[@@currentYear.to_s]
 			premium = @income*0.0188
 		else
 			premium = 47400*0.0188
 		end
-		print "You will contribute #{premium} to Employment Insurance."
+		print "You will pay #{premium} in EI premiums."
 	end
 
 end
 
-User = Finance.new("Andrew", "Botros", "28", "Ontario", 35000)
+User = Finance.new("Peter", "Pan", "30", "Ontario", 80000)
 puts User.greeting
 puts User.tfsa.room
 puts User.ei.contributions
