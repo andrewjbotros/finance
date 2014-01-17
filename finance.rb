@@ -85,6 +85,17 @@ class Finance
 		print " "*@@indent + "Net Income: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
+
+	def taxInformation
+		print " "*@@header + "TAX INFORMATION\n"
+		print "-"*@@width + "\n"
+		print " "*@@indent + "RRSP: $#{@rrsp.deduction.round}\n"
+		print " "*@@indent + "TFSA: $#{@tfsa.contribution.round}\n"
+		print " "*@@indent + "Total Contributions: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
+		print " "*@@indent + "Net Income: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
+		print "-"*@@width + "\n"
+	end
+
 end
 
 class CPP
@@ -159,7 +170,6 @@ class Taxes
 	def incomeTax (province)
 		i = 0
 		incomeTax = 0
-		incomeCount = @income
 		incomeSum = 0
 		bracket = taxBracket
 
@@ -178,10 +188,11 @@ class Taxes
 				end
 			end
 		else
-			while i < @@taxRates2013[province].length - 1
-				if incomeCount > @@taxRates2013[province][i][1]
+			incomeSum = @income
+			while i < bracket - 1
+				if incomeSum > @@taxRates2013[province][i][1]
 					incomeTax += @@taxRates2013[province][i][0]*@@taxRates2013[province][i][1]
-					incomeCount = incomeCount - @@taxRates2013[province][i][1]
+					incomeSum -= @@taxRates2013[province][i][1]
 					i += 1
 				end
 			end
@@ -235,6 +246,6 @@ puts User.personalInfo
 sleep(1)
 puts User.payrollDeductions
 sleep(1)
-puts User.payrollDeductionsPercent
+puts User.taxInformation
 sleep(1)
 puts User.registeredSavings
