@@ -178,7 +178,7 @@ class Finance
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
 		print " "*@@indent + "Tax (Provincial): $#{@taxes.provincialTaxes.round}\n"
 		#print " "*@@indent + "Tax (Federal): $#{@taxes.federalTaxes}\n"
-		print " "*@@indent + "Total: $#{@income.round}\n"
+		print " "*@@indent + "Total: $#{@cpp.premium.round + @ei.premium.round + @taxes.provincialTaxes.round}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -187,7 +187,7 @@ class Finance
 		print "-"*@@width + "\n"
 		print " "*@@indent + "RRSP Contribution: $#{@rrsp.deduction.round}\n"
 		print " "*@@indent + "TFSA Contribution: $#{@tfsa.contribution.round}\n"
-		print " "*@@indent + "Total: $#{@income}\n"
+		print " "*@@indent + "Total: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
 		print "-"*@@width + "\n"
 	end
 end
