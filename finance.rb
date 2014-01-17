@@ -1,6 +1,6 @@
 #           ##########################################################
 #           ##############                             ###############
-#           ##############    LOAD APPROPRIATE GEMS    ###############
+#           ##############        LOAD RUBY GEMS       ###############
 #           ##############                             ###############
 #           ##########################################################
 
@@ -105,11 +105,11 @@ require 'csv'
 @@taxRates2013["AB"] = 0.10
 @@taxRates2013["BC"] = [[0.0506, 37568],[0.077, 37570],[0.105, 11130],[0.1229, 18486],[0.147, 104754]]
 @@taxRates2013["Federal"] = [[0.15, 43561], [0.22, 43562], [0.26, 47931], [0.29, 135054]]
-@@taxRates2013["MB"] = [[10.8, 31000],[12.75, 36000], [17.4, 67000]]
-@@taxRates2013["NB"] = [[9.39, 38954], [13.46, 38954], [14.46, 48754], [16.07, 126662]]
+@@taxRates2013["MB"] = [[0.108, 31000],[0.1275, 36000], [0.174, 67000]]
+@@taxRates2013["NB"] = [[0.939, 38954], [0.1346, 38954], [0.1446, 48754], [0.1607, 126662]]
 @@taxRates2013["NL"] = [[0.077, 33748], [0.125, 33748], [0.133, 67496]]
-@@taxRates2013["NT"] = [[5.9, 39453], [8.6, 39455], [12.2, 49378], [14.05, 128286]]
-@@taxRates2013["NS"] = [[8.79, 29590], [14.95, 29590],[16.67, 33820], [17.5, 57000], [21, 150000]]
+@@taxRates2013["NT"] = [[0.059, 39453], [0.086, 39455], [0.122, 49378], [0.1405, 128286]]
+@@taxRates2013["NS"] = [[0.0879, 29590], [0.1495, 29590],[0.1667, 33820], [0.175, 57000], [0.21, 150000]]
 @@taxRates2013["NU"] = [[4, 41535], [7, 41536], [9, 51983], [11.5, 135054]]
 @@taxRates2013["ON"] = [[0.0505, 39723], [0.0915, 39725], [0.1116, 429552], [0.1316, 509000]]
 @@taxRates2013["PE"] = [[0.098, 31984], [13.8, 31985], [16.7, 63969]]
@@ -141,9 +141,9 @@ require 'csv'
 #           ##########################################################
 
 class Finance
-	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:province,:income,:tfsa,:ei,:cpp,:rrsp,:taxes
+	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:sex,:province,:income,:tfsa,:ei,:cpp,:rrsp,:taxes
 
-	def initialize (firstName, lastName, age, province, income)
+	def initialize (firstName, lastName, age, sex, province, income)
 		@firstName = firstName
 		@lastName = lastName
 		@fullName = firstName + " " + lastName
@@ -151,6 +151,7 @@ class Finance
 		@age = age
 		@province = province
 		@income = income
+		@sex = sex
 		@tfsa = TFSA.new(@age)
 		@ei = EI.new(@income)
 		@cpp = CPP.new(@income)
@@ -161,8 +162,9 @@ class Finance
 	def personalInfo
 		print "\n" + " "*@@header + "PERSONAL INFORMATION\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "Name: #{@firstName} #{@lastName}\n" 
+		print " "*@@indent + "Name: #{@fullName}\n" 
 		print " "*@@indent + "Age: #{@age}\n"
+		print " "*@@indent + "Sex: #{@sex.upcase}\n"
 		print " "*@@indent + "Province: #{@province}\n"
 		print " "*@@indent + "Income: $#{@income}\n"
 		print "-"*@@width + "\n"
@@ -174,7 +176,7 @@ class Finance
 		print "-"*@@width + "\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
-		#print " "*@@indent + "Tax (Provincial): $#{@taxes.provincialTaxes}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@taxes.provincialTaxes.round}\n"
 		#print " "*@@indent + "Tax (Federal): $#{@taxes.federalTaxes}\n"
 		print " "*@@indent + "Total: $#{@income.round}\n"
 		print "-"*@@width + "\n"
@@ -183,7 +185,7 @@ class Finance
 	def registeredSavings
 		print " "*@@header + "REGISTERED SAVINGS\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "RRSP Contribution: $#{@rrsp.contribution.round}\n"
+		print " "*@@indent + "RRSP Contribution: $#{@rrsp.deduction.round}\n"
 		print " "*@@indent + "TFSA Contribution: $#{@tfsa.contribution.round}\n"
 		print " "*@@indent + "Total: $#{@income}\n"
 		print "-"*@@width + "\n"
@@ -225,14 +227,14 @@ class RRSP
 		@income = income
 	end
 
-	def contribution
-		contribution = 0
+	def deduction
+		deduction = 0
 		if @income*@@rrspRate[@@currentYear] < @@rrspMax[@@currentYear]
-			contribution = @income*@@rrspRate[@@currentYear]
+			deduction = @income*@@rrspRate[@@currentYear]
 		else
-			contribution = @@rrspMax[@@currentYear]*@@rrspRate[@@currentYear]
+			deduction = @@rrspMax[@@currentYear]
 		end
-		return contribution
+		return deduction
 	end
 end
 
@@ -243,38 +245,45 @@ class Taxes
 		@province = province
 	end
 
+	def marginalBracket
+
+	end
+
 	def provincialTaxes
 		i = 0
 		incomeTax = 0
 		incomeTemp = @income
 
 		if @income < @@taxBasic2013[@province]
-			return 0
+		 	incomeTax = 0
+		elsif @income <= @@taxRates2013[@province][-1][1]
+			incomeTax = 10
 		else
-			#case 1: income less than minimum basic amount, tax = 0
-			#case 2: income greater than maximum amount, a1*b1 + a2*b2 + ... an*(income - bn)
-			#case 3: income less than maximum amount: 	i) income*b1
-			#											ii) a1*b1 + a2*(income - b1)
-			while incomeTemp > 0
-				while i < @@taxRates2013[@province].length
-				incomeTemp -= @@taxRates2013[@province][i][1]
-				if @income > @@taxRates2013[@province][-1][1]
-			while i < @@taxRates2013[@province].length
-				incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
-				i += 1
+			while i < @@taxRates2013[@province].length - 1
+				if incomeTemp > @@taxRates2013[@province][i][1]
+					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
+					incomeTemp = incomeTemp - @@taxRates2013[@province][i][1]
+					i += 1
+				end
 			end
-		
-			return incomeTax
+			incomeTax += incomeTemp*@@taxRates2013[@province][-1][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
 		end
+		# 	puts "Income: #{@income}"
+		# 	puts "Max Income Bracket: #{@@taxRates2013[@province][-1][1]}"
 
-
-		# while @income < @@taxRates2013[@province][-1][1]
-
-		# if @income < @@taxRates2013[@province][-1][1]
-		# 	puts "Your income: #{@income}"
-		# 	puts "Your max tax: #{@@taxRates2013[@province][-1][1]}"
+		# else
+		# 	#case 1: income less than minimum basic amount, tax = 0
+		# 	#case 2: income greater than maximum amount, a1*b1 + a2*b2 + ... an*(income - bn)
+		# 	#case 3: income less than maximum amount: 	i) income*b1
+		# 	#											ii) a1*b1 + a2*(income - b1)
+		# 	#                                           iii) a1*b1 + a2*b2 + a3*(income - b2) ...
+		# 	incomeTax = 1000000000000
 		# end
+		# return incomeTax
+		return incomeTax
 	end
+			
+			
 
 	def federalTaxes
 	end
@@ -313,14 +322,12 @@ class TFSA
 end
 
 #           ##########################################################
-#           ##############        CREATE NEW USER      ###############
+#           ##############        CREATE NEW USER;     ###############
 #           ##############         PRINT RESULTS       ###############
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "30", "ON", 100000)
+User = Finance.new("Peter", "Pan", "30", "M", "ON", 1000000)
 puts User.personalInfo
 puts User.payrollDeductions
 puts User.registeredSavings
-puts User.fullName
-puts User.abbrName
