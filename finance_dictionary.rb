@@ -11,7 +11,7 @@
 @@indent = 3
 @@header = (@@width*6/20).to_i
 
-@@currentYear = Time::new.year.to_s
+@@year = Time::new.year.to_s
 
 #                            EMPLOYMENT INSURANCE (EI)    
 #           ##########################################################
@@ -30,6 +30,9 @@
 @@cppRate = {}
 @@cppRate["2014"] = 0.0495
 @@cppRate["2013"] = 0.0495
+
+@@cppMinimum = {}
+@@cppMinimum["2014"] = 3500
 
 @@YMPE={}
 @@YMPE["2014"] = 52500

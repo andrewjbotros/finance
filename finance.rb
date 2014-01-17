@@ -79,10 +79,10 @@ class CPP
 	end
 	def premium
 		premium = 0
-		if @income < @@YMPE[@@currentYear]
-			premium = @income*@@cppRate[@@currentYear]
+		if @income < @@YMPE[@@year]
+			premium = (@income - @@cppMinimum[@@year])*@@cppRate[@@year]
 		else
-			premium = @@YMPE[@@currentYear]*@@cppRate[@@currentYear]
+			premium = (@@YMPE[@@year] - @@cppMinimum[@@year])*@@cppRate[@@year]
 		end
 		return premium
 	end
@@ -94,10 +94,10 @@ class EI
 	end
 	def premium
 		premium = 0
-		if @income < @@eiMax[@@currentYear]
-			premium = @income*@@eiRate[@@currentYear]
+		if @income < @@eiMax[@@year]
+			premium = @income*@@eiRate[@@year]
 		else
-			premium = @@eiMax[@@currentYear]*@@eiRate[@@currentYear]
+			premium = @@eiMax[@@year]*@@eiRate[@@year]
 		end
 		return premium
 	end
@@ -110,10 +110,10 @@ class RRSP
 
 	def deduction
 		deduction = 0
-		if @income*@@rrspRate[@@currentYear] < @@rrspMax[@@currentYear]
-			deduction = @income*@@rrspRate[@@currentYear]
+		if @income*@@rrspRate[@@year] < @@rrspMax[@@year]
+			deduction = @income*@@rrspRate[@@year]
 		else
-			deduction = @@rrspMax[@@currentYear]
+			deduction = @@rrspMax[@@year]
 		end
 		return deduction
 	end
@@ -186,7 +186,7 @@ class TFSA
 		if @age < 18
 			return 0
 		else
-			return @@tfsaAmount[@@currentYear.to_s]
+			return @@tfsaAmount[@@year.to_s]
 		end
 	end
 
