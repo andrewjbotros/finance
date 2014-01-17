@@ -57,9 +57,9 @@ class Finance
 		print " "*@@indent + "Gross Income: $#{@income}\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
-		print " "*@@indent + "Tax (Provincial): $#{@taxes.provincialTaxes.round}\n"
-		#print " "*@@indent + "Tax (Federal): $#{@taxes.federalTaxes}\n"
-		print " "*@@indent + "Net Income: $#{@income - (@cpp.premium.round + @ei.premium.round + @taxes.provincialTaxes.round)}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@taxes.incomeTaxes(@province).round}\n"
+		print " "*@@indent + "Tax (Federal): $#{@taxes.incomeTaxes("Federal").round}\n"
+		print " "*@@indent + "Net Income: $#{@income - (@cpp.premium.round + @ei.premium.round + @taxes.incomeTaxes(@province).round)}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -140,44 +140,39 @@ class Taxes
 		return k
 	end
 
-	def provincialTaxes
+	def incomeTaxes (province)
 		i = 0
 		incomeTax = 0
 		incomeCount = @income
 		incomeSum = 0
 		bracket = taxBracket
 
-		if @income < @@taxBasic2013[@province]
+		if @income < @@taxBasic2013[province]
 		 	incomeTax = 0
-		elsif @province == "AB"
-			incomeTax = @income*@@taxRates2013[@province][0][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
-		elsif @income <= @@taxRates2013[@province][-1][1]
+		elsif province == "AB"
+			incomeTax = @income*@@taxRates2013[province][0][0] - @@taxBasic2013[province]*@@taxRates2013[province][0][0]
+		elsif @income <= @@taxRates2013[province][-1][1]
 			while i < bracket - 1
-				if @income > @@taxRates2013[@province][i][0]
-					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
-					incomeSum += @@taxRates2013[@province][i][1]
+				if @income > @@taxRates2013[province][i][0]
+					incomeTax += @@taxRates2013[province][i][0]*@@taxRates2013[province][i][1]
+					incomeSum += @@taxRates2013[province][i][1]
 					puts "#{incomeSum}"
 				else
-					incomeTax += @@taxRates2013[@province][i][0]*(@income - incomeSum)
+					incomeTax += @@taxRates2013[province][i][0]*(@income - incomeSum)
 				end
 			end
 		else
-			while i < @@taxRates2013[@province].length - 1
-				if incomeCount > @@taxRates2013[@province][i][1]
-					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
-					incomeCount = incomeCount - @@taxRates2013[@province][i][1]
+			while i < @@taxRates2013[province].length - 1
+				if incomeCount > @@taxRates2013[province][i][1]
+					incomeTax += @@taxRates2013[province][i][0]*@@taxRates2013[province][i][1]
+					incomeCount = incomeCount - @@taxRates2013[province][i][1]
 					i += 1
 				end
 			end
-			incomeTax += incomeCount*@@taxRates2013[@province][-1][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
+			incomeTax += incomeCount*@@taxRates2013[province][-1][0] - @@taxBasic2013[province]*@@taxRates2013[province][0][0]
 		end
 
 		return incomeTax
-	end
-			
-			
-
-	def federalTaxes
 	end
 end
 
