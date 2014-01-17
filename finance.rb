@@ -59,7 +59,7 @@ class Finance
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
 		print " "*@@indent + "Tax (Provincial): $#{@taxes.incomeTax(@province).round}\n"
 		print " "*@@indent + "Tax (Federal): $#{@taxes.incomeTax("Federal").round}\n"
-		print " "*@@indent + "Net Income: $#{@income - (@cpp.premium.round + @ei.premium.round + @taxes.incomeTax(@province).round + @taxes.incomeTax("Federal").round)}\n"
+		print " "*@@indent + "Net Income: $#{(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal"))).round}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -89,10 +89,10 @@ class Finance
 	def taxInformation
 		print " "*@@header + "TAX INFORMATION\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "RRSP: $#{@rrsp.deduction.round}\n"
-		print " "*@@indent + "TFSA: $#{@tfsa.contribution.round}\n"
-		print " "*@@indent + "Total Contributions: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
-		print " "*@@indent + "Net Income: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
+		print " "*@@indent + "Total: $#{@rrsp.deduction.round}\n"
+		print " "*@@indent + "Average Rate: $#{@tfsa.contribution.round}\n"
+		print " "*@@indent + "Marginal Rate: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
+		print " "*@@indent + "Tax Bracket: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
 
