@@ -105,7 +105,7 @@
 @@taxRates2013["YT"] = [[7.04, 43561], [9.68, 43562], [11.44, 47931], [12.76, 135054]]
 
 @@taxBasic2013 = {}
-@@taxRates2013["data"] = ["Marginal Tax Rate", "Marginal Income Bracket"]
+@@taxBasic2013["data"] = ["Basic Personal Amount"]
 @@taxBasic2013["AB"] = 17593
 @@taxBasic2013["BC"] = 10276
 @@taxBasic2013["Federal"] = 11038

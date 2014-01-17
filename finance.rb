@@ -81,7 +81,7 @@ class Finance
 		print "-"*@@width + "\n"
 		print " "*@@indent + "RRSP: $#{@rrsp.deduction.round}\n"
 		print " "*@@indent + "TFSA: $#{@tfsa.contribution.round}\n"
-		print " "*@@indent + "Total: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
+		print " "*@@indent + "Total Contributions: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
 		print " "*@@indent + "Net Income: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
@@ -232,9 +232,9 @@ end
 
 User = Finance.new("Peter", "Pan", "35", "M", "ON", 85000)
 puts User.personalInfo
-sleep(1.2)
+sleep(1)
 puts User.payrollDeductions
-sleep(1.2)
+sleep(1)
 puts User.payrollDeductionsPercent
-sleep(1.2)
+sleep(1)
 puts User.registeredSavings
