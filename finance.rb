@@ -22,7 +22,7 @@ require_relative 'finance_dictionary'
 #           ##########################################################
 
 class Finance
-	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:sex,:province,:income,:tfsa,:ei,:cpp,:rrsp,:taxes
+	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:sex,:province,:income,:tfsa,:ei,:cpp,:rrsp,:taxes,:netincome
 
 	def initialize (firstName, lastName, age, sex, province, income)
 		@firstName = firstName
@@ -38,6 +38,10 @@ class Finance
 		@cpp = CPP.new(@income)
 		@rrsp = RRSP.new(@income)
 		@taxes = Taxes.new(@income, @province)
+		@provincialTax = @taxes.incomeTax(@province)
+		@federalTax = @taxes.incomeTax("Federal")
+		@netincome = (@income - (@cpp.premium + @ei.premium + @provincialTax + @federalTax))
+
 	end
 
 	def personalInfo
@@ -59,7 +63,7 @@ class Finance
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
 		print " "*@@indent + "Tax (Provincial): $#{@taxes.incomeTax(@province).round}\n"
 		print " "*@@indent + "Tax (Federal): $#{@taxes.incomeTax("Federal").round}\n"
-		print " "*@@indent + "Net Income: $#{(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal"))).round}\n"
+		print " "*@@indent + "Net Income: $#{@netincome.round}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -72,7 +76,7 @@ class Finance
 		print " "*@@indent + "EI Premiums: #{(@ei.premium*100/@income).round(2)}%\n"
 		print " "*@@indent + "Tax (Provincial): #{(@taxes.incomeTax(@province)*100/@income).round(2)}%\n"
 		print " "*@@indent + "Tax (Federal): #{(@taxes.incomeTax("Federal")*100/@income).round(2)}%\n"
-		print " "*@@indent + "Net Income: #{((@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))*100/@income).round(2)}%\n"
+		print " "*@@indent + "Net Income: #{(@netincome*100/@income).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -249,3 +253,4 @@ sleep(1)
 puts User.taxInformation
 sleep(1)
 puts User.registeredSavings
+sleep(1)
