@@ -22,7 +22,8 @@ require_relative 'finance_dictionary'
 #           ##########################################################
 
 class Finance
-	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:sex,:province,:income,:tfsa,:ei,:cpp,:rrsp,:taxes,:netincome
+	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:sex,:province,:income,:netincome,:federalTax,:provincialTax
+	#:tfsa,:ei,:cpp,:rrsp,:taxes
 
 	def initialize (firstName, lastName, age, sex, province, income)
 		@firstName = firstName
@@ -41,7 +42,6 @@ class Finance
 		@provincialTax = @taxes.incomeTax(@province)
 		@federalTax = @taxes.incomeTax("Federal")
 		@netincome = (@income - (@cpp.premium + @ei.premium + @provincialTax + @federalTax))
-
 	end
 
 	def personalInfo
@@ -254,3 +254,4 @@ puts User.taxInformation
 sleep(1)
 puts User.registeredSavings
 sleep(1)
+puts User.federalTax
