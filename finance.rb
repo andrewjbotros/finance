@@ -57,9 +57,9 @@ class Finance
 		print " "*@@indent + "Gross Income: $#{@income}\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
-		print " "*@@indent + "Tax (Provincial): $#{@taxes.incomeTaxes(@province).round}\n"
-		print " "*@@indent + "Tax (Federal): $#{@taxes.incomeTaxes("Federal").round}\n"
-		print " "*@@indent + "Net Income: $#{@income - (@cpp.premium.round + @ei.premium.round + @taxes.incomeTaxes(@province).round)}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@taxes.incomeTax(@province).round}\n"
+		print " "*@@indent + "Tax (Federal): $#{@taxes.incomeTax("Federal").round}\n"
+		print " "*@@indent + "Net Income: $#{@income - (@cpp.premium.round + @ei.premium.round + @taxes.incomeTax(@province).round + @taxes.incomeTax("Federal").round)}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -140,7 +140,7 @@ class Taxes
 		return k
 	end
 
-	def incomeTaxes (province)
+	def incomeTax (province)
 		i = 0
 		incomeTax = 0
 		incomeCount = @income
