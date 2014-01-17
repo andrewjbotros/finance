@@ -22,35 +22,48 @@ require_relative 'finance_dictionary'
 #           ##########################################################
 
 class Finance
-	attr_reader :firstName,:lastName,:fullName,:abbrName,:age,:sex,:province,:income,:netincome,:federalTax,:provincialTax,:incomeTax,:taxBracket
-	#:tfsa,:ei,:cpp,:rrsp,:taxes
+	attr_reader :firstName,:lastName,:age,:sex,:province,:income,
+				:fullName,:abbrName,
+				:ei,:cpp,:taxes,:rrsp,:tfsa,
+				:taxBracket,:federalTax,:provincialTax,:incomeTax,:allTax,:avgTax,:marginalTax,
+				:netincome
+	#
 
 	def initialize (firstName, lastName, age, sex, province, income)
 		@firstName = firstName
 		@lastName = lastName
-		@fullName = firstName + " " + lastName
-		@abbrName = firstName + " " + lastName[0].upcase + "."
 		@age = age
+		@sex = sex
 		@province = province
 		@income = income
-		@sex = sex
-		@tfsa = TFSA.new(@age)
+
+		@fullName = firstName + " " + lastName
+		@abbrName = firstName + " " + lastName[0].upcase + "."
+
 		@ei = EI.new(@income)
 		@cpp = CPP.new(@income)
-		@rrsp = RRSP.new(@income)
 		@taxes = Taxes.new(@income, @province)
+		@rrsp = RRSP.new(@income)
+		@tfsa = TFSA.new(@age)
+
 		@taxBracket = @taxes.taxBracket(@province)
 		@federalTax = @taxes.incomeTax("Federal")
 		@provincialTax = @taxes.incomeTax(@province)
 		@incomeTax = @provincialTax + @federalTax
-		@payrollDeduction = @cpp.premium + @ei.premium + @provincialTax + @federalTax
-		@netincome = (@income - (@cpp.premium + @ei.premium + @provincialTax + @federalTax))
+		@allTax = @cpp.premium + @ei.premium + @incomeTax
+		@avgTax = (@incomeTax/@income)*100
+		@marginalTax = @@taxRates2013[@province][@taxBracket-1][0]*100
+	 	@netincome = (@income - (@cpp.premium + @ei.premium + @provincialTax + @federalTax))
+	end
+
+	def additionalParameters
+
 	end
 
 	def personalInfo
 		print "\n" + " "*@@header + "PERSONAL INFORMATION\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "Name: #{@fullName}\n" 
+		print " "*@@indent + "Name: #{@fullName}\n"
 		print " "*@@indent + "Age: #{@age}\n"
 		print " "*@@indent + "Sex: #{@sex.upcase}\n"
 		print " "*@@indent + "Province: #{@province}\n"
@@ -58,15 +71,14 @@ class Finance
 	end
 
 	def payrollDeductions
-		decimals = decimals.to_i
 		print " "*@@header + "PAYROLL DEDUCTIONS\n"
 		print "-"*@@width + "\n"
 		print " "*@@indent + "Gross Income: $#{@income}\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
-		print " "*@@indent + "Tax (Provincial): $#{@provincialTax.round}\n"
-		print " "*@@indent + "Tax (Federal): $#{@federalTax.round}\n"
-		print " "*@@indent + "Net Income: $#{@netincome.round}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@provincialTax}\n"
+		print " "*@@indent + "Tax (Federal): $#{@federalTax}\n"
+		print " "*@@indent + "Net Income: $#{@netincome}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -195,7 +207,6 @@ class Taxes
 
 		elsif prov == "AB"
 			incomeTax = @income*@@taxRates2013[prov][0][0] - @@taxBasic2013[prov]*@@taxRates2013[prov][0][0]
-
 		elsif @income <= @@taxRates2013[prov][-1][1]
 			while i < bracket - 1
 				if @income > @@taxRates2013[prov][i][0]
@@ -261,8 +272,9 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "35", "M", "ON", 50000)
-puts User.federalTax
+User = Finance.new("Peter", "Pan", "35", "M", "ON", 60000)
+
+puts User.firstName
 
 
 

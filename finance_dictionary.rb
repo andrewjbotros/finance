@@ -4,7 +4,7 @@
 #           ##############                             ###############
 #           ##########################################################
 
-#                SET FORMAT PARAMETERS, CURRENT YEAR, PROVINCE ABBR.   
+#                SET FORMAT PARAMETERS, CURRENT YEAR, PROVINCE ABBR.
 #           ##########################################################
 
 @@width = 50
@@ -13,7 +13,7 @@
 
 @@year = Time::new.year.to_s
 
-#                            EMPLOYMENT INSURANCE (EI)    
+#                            EMPLOYMENT INSURANCE (EI)
 #           ##########################################################
 
 @@eiRate = {}
@@ -24,7 +24,7 @@
 @@eiMax["2014"] = 48600
 @@eiMax["2013"] = 47400
 
-#                           CANADA PENSION PLAN (CPP)     
+#                           CANADA PENSION PLAN (CPP)
 #           ##########################################################
 
 @@cppRate = {}
@@ -61,7 +61,7 @@
 @@YMPE["1991"] = 30500
 @@YMPE["1990"] = 28900
 
-#                   REGISTERED RETIREMENT SAVINGS PLAN (RRSP)   
+#                   REGISTERED RETIREMENT SAVINGS PLAN (RRSP)
 #           ##########################################################
 
 @@rrspMax = {}
@@ -72,7 +72,7 @@
 @@rrspRate["2014"] = 0.18
 @@rrspRate["2013"] = 0.18
 
-#                        TAX FREE SAVINGS ACCOUNT (TFSA)    
+#                        TAX FREE SAVINGS ACCOUNT (TFSA)
 #           ##########################################################
 
 @@tfsaAmount = {}
@@ -84,7 +84,7 @@
 @@tfsaAmount["2010"] = 5000
 @@tfsaAmount["2009"] = 5000
 
-#                   PROVINCIAL AND FEDERAL INCOME TAX RATES   
+#                   PROVINCIAL AND FEDERAL INCOME TAX RATES
 #           ##########################################################
 
 @@taxRates2013 = {}
