@@ -72,16 +72,17 @@ class Finance
 		print " "*@@indent + "EI Premiums: #{(@ei.premium*100/@income).round(2)}%\n"
 		print " "*@@indent + "Tax (Provincial): #{(@taxes.incomeTax(@province)*100/@income).round(2)}%\n"
 		print " "*@@indent + "Tax (Federal): #{(@taxes.incomeTax("Federal")*100/@income).round(2)}%\n"
-		print " "*@@indent + "Net Income: #{(@income - (@cpp.premium.round + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))}%\n"
+		print " "*@@indent + "Net Income: #{((@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))*100/@income).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
 
 	def registeredSavings
-		print " "*@@header + "REGISTERED SAVINGS\n"
+		print " "*@@header + "ELIGIBLE CONTRIBUTIONS\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "RRSP Contribution: $#{@rrsp.deduction.round}\n"
-		print " "*@@indent + "TFSA Contribution: $#{@tfsa.contribution.round}\n"
+		print " "*@@indent + "RRSP: $#{@rrsp.deduction.round}\n"
+		print " "*@@indent + "TFSA: $#{@tfsa.contribution.round}\n"
 		print " "*@@indent + "Total: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
+		print " "*@@indent + "Net Income: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
 end
@@ -92,7 +93,9 @@ class CPP
 	end
 	def premium
 		premium = 0
-		if @income < @@YMPE[@@year]
+		if @income < @@cppMinimum[@@year]
+			premium = 0
+		elsif @income < @@YMPE[@@year]
 			premium = (@income - @@cppMinimum[@@year])*@@cppRate[@@year]
 		else
 			premium = (@@YMPE[@@year] - @@cppMinimum[@@year])*@@cppRate[@@year]
@@ -227,7 +230,7 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "17", "M", "ON", 85000)
+User = Finance.new("Peter", "Pan", "35", "M", "ON", 85000)
 puts User.personalInfo
 sleep(1.2)
 puts User.payrollDeductions
