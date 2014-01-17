@@ -73,6 +73,7 @@
 #           ##########################################################
 
 @@tfsaAmount = {}
+@@tfsaAmount["data"] = "Contribution Limit"
 @@tfsaAmount["2014"] = 5500
 @@tfsaAmount["2013"] = 5500
 @@tfsaAmount["2012"] = 5000
@@ -85,7 +86,7 @@
 
 @@taxRates2013 = {}
 @@taxRates2013["data"] = ["Marginal Tax Rate", "Marginal Income Bracket"]
-@@taxRates2013["AB"] = 0.10
+@@taxRates2013["AB"] = [[0.10, 17593]]
 @@taxRates2013["BC"] = [[0.0506, 37568],[0.077, 37570],[0.105, 11130],[0.1229, 18486],[0.147, 104754]]
 @@taxRates2013["Federal"] = [[0.15, 43561], [0.22, 43562], [0.26, 47931], [0.29, 135054]]
 @@taxRates2013["MB"] = [[0.108, 31000],[0.1275, 36000], [0.174, 67000]]

@@ -47,7 +47,6 @@ class Finance
 		print " "*@@indent + "Age: #{@age}\n"
 		print " "*@@indent + "Sex: #{@sex.upcase}\n"
 		print " "*@@indent + "Province: #{@province}\n"
-		print " "*@@indent + "Income: $#{@income}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -55,11 +54,12 @@ class Finance
 		decimals = decimals.to_i
 		print " "*@@header + "PAYROLL DEDUCTIONS\n"
 		print "-"*@@width + "\n"
+		print " "*@@indent + "Gross Income: $#{@income}\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
 		print " "*@@indent + "Tax (Provincial): $#{@taxes.provincialTaxes.round}\n"
 		#print " "*@@indent + "Tax (Federal): $#{@taxes.federalTaxes}\n"
-		print " "*@@indent + "Total: $#{@cpp.premium.round + @ei.premium.round + @taxes.provincialTaxes.round}\n"
+		print " "*@@indent + "Net Income: $#{@income - (@cpp.premium.round + @ei.premium.round + @taxes.provincialTaxes.round)}\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -127,7 +127,7 @@ class Taxes
 	end
 
 	def marginalBracket
-
+		puts "#{@@taxRates2013[@province].length}"
 	end
 
 	def provincialTaxes
@@ -137,6 +137,8 @@ class Taxes
 
 		if @income < @@taxBasic2013[@province]
 		 	incomeTax = 0
+		elsif @province == "AB"
+			incomeTax = @income*@@taxRates2013[@province][0][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
 		elsif @income <= @@taxRates2013[@province][-1][1]
 			incomeTax = 10
 		else
@@ -208,7 +210,10 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "30", "M", "ON", 1000000)
+User = Finance.new("Peter", "Pan", "30", "M", "AB", 100000)
 puts User.personalInfo
+sleep(1.2)
 puts User.payrollDeductions
+sleep(1.2)
 puts User.registeredSavings
+User.taxes.marginalBracket
