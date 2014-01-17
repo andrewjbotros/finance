@@ -126,43 +126,52 @@ class Taxes
 		@province = province
 	end
 
-	def marginalBracket
-		puts "#{@@taxRates2013[@province].length}"
+	def taxBracket
+		k = 0
+
+		while k < @@taxRates2013[@province].length
+			if @income < @@taxRates2013[@province][k][1]
+				return k + 1
+			else
+				k += 1
+			end
+		end
+
+		return k
 	end
 
 	def provincialTaxes
 		i = 0
 		incomeTax = 0
-		incomeTemp = @income
+		incomeCount = @income
+		incomeSum = 0
+		bracket = taxBracket
 
 		if @income < @@taxBasic2013[@province]
 		 	incomeTax = 0
 		elsif @province == "AB"
 			incomeTax = @income*@@taxRates2013[@province][0][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
 		elsif @income <= @@taxRates2013[@province][-1][1]
-			incomeTax = 10
+			while i < bracket - 1
+				if @income > @@taxRates2013[@province][i][0]
+					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
+					incomeSum += @@taxRates2013[@province][i][1]
+					puts "#{incomeSum}"
+				else
+					incomeTax += @@taxRates2013[@province][i][0]*(@income - incomeSum)
+				end
+			end
 		else
 			while i < @@taxRates2013[@province].length - 1
-				if incomeTemp > @@taxRates2013[@province][i][1]
+				if incomeCount > @@taxRates2013[@province][i][1]
 					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
-					incomeTemp = incomeTemp - @@taxRates2013[@province][i][1]
+					incomeCount = incomeCount - @@taxRates2013[@province][i][1]
 					i += 1
 				end
 			end
-			incomeTax += incomeTemp*@@taxRates2013[@province][-1][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
+			incomeTax += incomeCount*@@taxRates2013[@province][-1][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
 		end
-		# 	puts "Income: #{@income}"
-		# 	puts "Max Income Bracket: #{@@taxRates2013[@province][-1][1]}"
 
-		# else
-		# 	#case 1: income less than minimum basic amount, tax = 0
-		# 	#case 2: income greater than maximum amount, a1*b1 + a2*b2 + ... an*(income - bn)
-		# 	#case 3: income less than maximum amount: 	i) income*b1
-		# 	#											ii) a1*b1 + a2*(income - b1)
-		# 	#                                           iii) a1*b1 + a2*b2 + a3*(income - b2) ...
-		# 	incomeTax = 1000000000000
-		# end
-		# return incomeTax
 		return incomeTax
 	end
 			
@@ -210,10 +219,9 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "30", "M", "AB", 100000)
+User = Finance.new("Peter", "Pan", "30", "M", "ON", 600000)
 puts User.personalInfo
 sleep(1.2)
 puts User.payrollDeductions
 sleep(1.2)
 puts User.registeredSavings
-User.taxes.marginalBracket
