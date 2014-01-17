@@ -63,6 +63,19 @@ class Finance
 		print "-"*@@width + "\n"
 	end
 
+	def payrollDeductionsPercent
+		decimals = decimals.to_i
+		print " "*@@header + "PAYROLL DEDUCTIONS (%)\n"
+		print "-"*@@width + "\n"
+		print " "*@@indent + "Gross Income: 100%\n"
+		print " "*@@indent + "CPP Premiums: #{(@cpp.premium*100/@income).round(2)}%\n"
+		print " "*@@indent + "EI Premiums: #{(@ei.premium*100/@income).round(2)}%\n"
+		print " "*@@indent + "Tax (Provincial): #{(@taxes.incomeTax(@province)*100/@income).round(2)}%\n"
+		print " "*@@indent + "Tax (Federal): #{(@taxes.incomeTax("Federal")*100/@income).round(2)}%\n"
+		print " "*@@indent + "Net Income: #{(@income - (@cpp.premium.round + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))}%\n"
+		print "-"*@@width + "\n"
+	end
+
 	def registeredSavings
 		print " "*@@header + "REGISTERED SAVINGS\n"
 		print "-"*@@width + "\n"
@@ -156,7 +169,7 @@ class Taxes
 				if @income > @@taxRates2013[province][i][0]
 					incomeTax += @@taxRates2013[province][i][0]*@@taxRates2013[province][i][1]
 					incomeSum += @@taxRates2013[province][i][1]
-					puts "#{incomeSum}"
+					i +=1
 				else
 					incomeTax += @@taxRates2013[province][i][0]*(@income - incomeSum)
 				end
@@ -214,9 +227,11 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "30", "M", "ON", 600000)
+User = Finance.new("Peter", "Pan", "17", "M", "ON", 85000)
 puts User.personalInfo
 sleep(1.2)
 puts User.payrollDeductions
+sleep(1.2)
+puts User.payrollDeductionsPercent
 sleep(1.2)
 puts User.registeredSavings
