@@ -22,12 +22,10 @@ require_relative 'finance_dictionary'
 #           ##########################################################
 
 class Finance
+	attr_writer :income,:province,:ei,:cpp,:rrsp
 	attr_reader :firstName,:lastName,:age,:sex,:province,:income,
 				:fullName,:abbrName,
-				:ei,:cpp,:taxes,:rrsp,:tfsa,
-				:taxBracket,:federalTax,:provincialTax,:incomeTax,:allTax,:avgTax,:marginalTax,
-				:netincome
-	#
+				:ei,:cpp,:taxes,:rrsp,:tfsa
 
 	def initialize (firstName, lastName, age, sex, province, income)
 		@firstName = firstName
@@ -46,18 +44,13 @@ class Finance
 		@rrsp = RRSP.new(@income)
 		@tfsa = TFSA.new(@age)
 
-		@taxBracket = @taxes.taxBracket(@province)
-		@federalTax = @taxes.incomeTax("Federal")
-		@provincialTax = @taxes.incomeTax(@province)
-		@incomeTax = @provincialTax + @federalTax
-		@allTax = @cpp.premium + @ei.premium + @incomeTax
-		@avgTax = (@incomeTax/@income)*100
-		@marginalTax = @@taxRates2013[@province][@taxBracket-1][0]*100
-	 	@netincome = (@income - (@cpp.premium + @ei.premium + @provincialTax + @federalTax))
 	end
 
-	def additionalParameters
-
+	def update (updateIncome)
+		@income = updateIncome
+		@ei.income = updateIncome
+		@cpp.income = updateIncome
+		@rrsp.income = updateIncome
 	end
 
 	def personalInfo
@@ -86,7 +79,6 @@ class Finance
 		decimals = decimals.to_i
 		print " "*@@header + "PAYROLL DEDUCTIONS (%)\n"
 		print "-"*@@width + "\n"
-		print " "*@@indent + "Gross Income: 100%\n"
 		print " "*@@indent + "CPP Premiums: #{(@cpp.premium*100/@income).round(2)}%\n"
 		print " "*@@indent + "EI Premiums: #{(@ei.premium*100/@income).round(2)}%\n"
 		print " "*@@indent + "Tax (Provincial): #{(@provincialTax*100/@income).round(2)}%\n"
@@ -124,10 +116,11 @@ class Finance
 		print " "*@@indent + "Tax Bracket: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
-
 end
 
 class CPP
+	attr_accessor :income
+
 	def initialize (income)
 		@income = income
 	end
@@ -145,7 +138,9 @@ class CPP
 end
 
 class EI
-	def initialize (income)
+	attr_accessor :income
+
+	def initialize(income)
 		@income = income
 	end
 	def premium
@@ -160,6 +155,8 @@ class EI
 end
 
 class RRSP
+	attr_accessor :income
+
 	def initialize (income)
 		@income = income
 	end
@@ -172,65 +169,6 @@ class RRSP
 			deduction = @@rrspMax[@@year]
 		end
 		return deduction
-	end
-end
-
-class Taxes
-
-	def initialize(income, province)
-		@income = income
-		@province = province
-	end
-
-	def taxBracket (prov)
-		k = 0
-
-		while k < @@taxRates2013[prov].length
-			if @income < @@taxRates2013[prov][k][1]
-				return k + 1
-			else
-				k += 1
-			end
-		end
-
-		return k
-	end
-
-	def incomeTax (prov)
-		i = 0
-		incomeTax = 0
-		incomeSum = 0
-		bracket = taxBracket(prov)
-
-		if @income < @@taxBasic2013[prov]
-		 	incomeTax = 0
-
-		elsif prov == "AB"
-			incomeTax = @income*@@taxRates2013[prov][0][0] - @@taxBasic2013[prov]*@@taxRates2013[prov][0][0]
-		elsif @income <= @@taxRates2013[prov][-1][1]
-			while i < bracket - 1
-				if @income > @@taxRates2013[prov][i][0]
-					incomeTax += @@taxRates2013[prov][i][0]*@@taxRates2013[prov][i][1]
-					incomeSum += @@taxRates2013[prov][i][1]
-					i +=1
-				else
-					incomeTax += (@@taxRates2013[prov][i][0]*(@income - incomeSum) - @@taxBasic2013[prov]*@@taxRates2013[prov][0][0])
-				end
-			end
-
-		else
-			incomeSum = @income
-			while i < bracket - 1
-				if incomeSum > @@taxRates2013[prov][i][1]
-					incomeTax += @@taxRates2013[prov][i][0]*@@taxRates2013[prov][i][1]
-					incomeSum -= @@taxRates2013[prov][i][1]
-					i += 1
-				end
-			end
-			incomeTax += incomeCount*@@taxRates2013[province][-1][0] - @@taxBasic2013[province]*@@taxRates2013[province][0][0]
-		end
-
-		return incomeTax
 	end
 end
 
@@ -266,19 +204,89 @@ class TFSA
 	end
 end
 
+class Taxes
+
+	def initialize(income, province)
+		@income = income
+		@province = province
+	end
+
+	def bracket
+		k = 0
+
+		while k < @@taxRates2013[@province].length
+			if @income < @@taxRates2013[@province][k][1]
+				return k + 1
+			else
+				k += 1
+			end
+		end
+
+		return k
+	end
+
+	def incomeTax
+		i = 0
+		incomeTax = 0
+		incomeSum = 0
+
+		if @income < @@taxBasic2013[@province]
+		 	incomeTax = 0
+
+		elsif @province == "AB"
+			incomeTax = @income*@@taxRates2013[@province][0][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
+		elsif @income <= @@taxRates2013[@province][-1][1]
+			while i < bracket - 1
+				if @income > @@taxRates2013[@province][i][0]
+					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
+					incomeSum += @@taxRates2013[@province][i][1]
+					i +=1
+				else
+					incomeTax += (@@taxRates2013[@province][i][0]*(@income - incomeSum) - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0])
+				end
+			end
+
+		else
+			incomeSum = @income
+			while i < bracket - 1
+				if incomeSum > @@taxRates2013[@province][i][1]
+					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
+					incomeSum -= @@taxRates2013[@province][i][1]
+					i += 1
+				end
+			end
+			incomeTax += incomeCount*@@taxRates2013[@province][-1][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
+		end
+
+		return incomeTax
+	end
+end
+
 #           ##########################################################
 #           ##############        CREATE NEW USER;     ###############
 #           ##############         PRINT RESULTS       ###############
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-User = Finance.new("Peter", "Pan", "35", "M", "ON", 60000)
+finance = Finance.new("Peter", "Pan", "35", "M", "YT", 40000)
+puts finance.income
+puts finance.ei.premium
+finance.update(100000)
+puts finance.income
+puts finance.ei.premium
 
-puts User.firstName
+# car = Car.new(50000)
+# puts car.income    #50000
+# puts car.car2.anything  #250000
 
 
+# car.update_income(100000)
+# puts car.income #100000
+# puts car.car2.anything #500000
 
-
+# ei = EI.new( ... )
+# finance = Finance.new( ... )
+# finance.ei = ei
 
 
 
