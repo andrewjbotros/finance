@@ -22,7 +22,7 @@ require_relative 'finance_dictionary'
 #           ##########################################################
 
 class Finance
-	attr_writer :income,:province,:ei,:cpp,:rrsp
+	attr_writer :income,:province
 	attr_reader :firstName,:lastName,:age,:sex,:province,:income,
 				:fullName,:abbrName,
 				:ei,:cpp,:taxes,:rrsp,:tfsa
@@ -46,11 +46,11 @@ class Finance
 
 	end
 
-	def update (updateIncome)
-		@income = updateIncome
-		@ei.income = updateIncome
-		@cpp.income = updateIncome
-		@rrsp.income = updateIncome
+	def update (newIncome)
+		@income = newIncome
+		@ei.income = newIncome
+		@cpp.income = newIncome
+		@rrsp.income = newIncome
 	end
 
 	def personalInfo
@@ -270,23 +270,10 @@ end
 
 finance = Finance.new("Peter", "Pan", "35", "M", "YT", 40000)
 puts finance.income
-puts finance.ei.premium
+puts finance.ei.premium.round
 finance.update(100000)
 puts finance.income
-puts finance.ei.premium
-
-# car = Car.new(50000)
-# puts car.income    #50000
-# puts car.car2.anything  #250000
-
-
-# car.update_income(100000)
-# puts car.income #100000
-# puts car.car2.anything #500000
-
-# ei = EI.new( ... )
-# finance = Finance.new( ... )
-# finance.ei = ei
+puts finance.ei.premium.round
 
 
 
