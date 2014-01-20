@@ -134,13 +134,8 @@ class EI
 		@income = income
 	end
 	def premium
-		premium = 0
-		if @income < @@eiMax[@@year]
-			premium = @income*@@eiRate[@@year]
-		else
-			premium = @@eiMax[@@year]*@@eiRate[@@year]
-		end
-		return premium
+  		@income < @@eiMax[@@year] ? premium = @income*@@eiRate[@@year] : premium = @@eiMax[@@year]*@@eiRate[@@year]
+  		return premium
 	end
 end
 
@@ -152,13 +147,8 @@ class RRSP
 	end
 
 	def deduction
-		deduction = 0
-		if @income*@@rrspRate[@@year] < @@rrspMax[@@year]
-			deduction = @income*@@rrspRate[@@year]
-		else
-			deduction = @@rrspMax[@@year]
-		end
-		return deduction
+  		@income*@@rrspRate[@@year] < @@rrspMax[@@year] ? deduction = @income*@@eiRate[@@year] : deduction = @@eiMax[@@year]*@@eiRate[@@year]
+  		return deduction
 	end
 end
 
@@ -203,52 +193,18 @@ class Taxes
 		@province = province
 	end
 
-	def taxBracket
-
-		(0..@@taxRates2013(@province).length).each do |i|
-			if @income < @@taxRates2013[@province][i][1]
-				return i
+	def incomeTax
+		sum = 0
+		(0...@@taxRates2013[@province].length).each do |i|
+			sum += @@taxRates2013[@province][i][1]
+			puts "#{sum}"
+			if @income < sum
+				bracket = i + 1
 			else
-				return @@taxRates2013(@province).length - 1
+				bracket = @@taxRates2013[@province].length - 1
 			end
+			return bracket
 		end
-
-	def incomeTax (userProvince)
-		i = 0
-		incomeTax = 0
-		incomeSum = 0
-		bracket = taxBracket
-
-		if @income < @@taxBasic2013[userProvince]
-		 	incomeTax = 0
-
-		elsif userProvince == "AB"
-			incomeTax = @@taxRates2013[userProvince][0][0]*(@income - @@taxBasic2013[userProvince])
-
-		elsif @income <= @@taxRates2013[userProvince][-1][1]
-			while i < bracket - 1
-				if @income > @@taxRates2013[userProvince][i][0]
-					incomeTax += @@taxRates2013[userProvince][i][0]*@@taxRates2013[userProvince][i][1]
-					incomeSum += @@taxRates2013[userProvince][i][1]
-					i +=1
-				else
-					incomeTax += (@@taxRates2013[userProvince][i][0]*(@income - incomeSum) - @@taxBasic2013[userProvince]*@@taxRates2013[userProvince][0][0])
-				end
-			end
-
-		else
-			incomeSum = @income
-			while i < bracket - 1
-				if incomeSum > @@taxRates2013[userProvince][i][1]
-					incomeTax += @@taxRates2013[userProvince][i][0]*@@taxRates2013[userProvince][i][1]
-					incomeSum -= @@taxRates2013[userProvince][i][1]
-					i += 1
-				end
-			end
-			incomeTax += incomeSum*@@taxRates2013[userProvince][-1][0] - @@taxBasic2013[userProvince]*@@taxRates2013[userProvince][0][0]
-		end
-
-		return incomeTax
 	end
 end
 
@@ -258,7 +214,10 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "35", "M", "ON", 60000)
-puts finance.deductions
-
+finance = Finance.new("Peter", "Pan", "35", "M", "ON", 10000)
+puts finance.ei.premium
+finance.update(40000)
+puts finance.ei.premium
+finance.update(100000)
+puts finance.ei.premium
 
