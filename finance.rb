@@ -40,20 +40,21 @@ class Finance
 
 		@ei = EI.new(@income)
 		@cpp = CPP.new(@income)
-		@taxes = Taxes.new(@income, @province)
 		@rrsp = RRSP.new(@income)
+		@taxes = Taxes.new(@income, @province)
 		@tfsa = TFSA.new(@age)
 
 	end
 
-	def update (newIncome)
-		@income = newIncome
-		@ei.income = newIncome
-		@cpp.income = newIncome
-		@rrsp.income = newIncome
+	def update (userIncome)
+		@income = userIncome
+		@ei.income = userIncome
+		@cpp.income = userIncome
+		@rrsp.income = userIncome
+		@taxes.income = userIncome
 	end
 
-	def personalInfo
+	def info
 		print "\n" + " "*@@header + "PERSONAL INFORMATION\n"
 		print "-"*@@width + "\n"
 		print " "*@@indent + "Name: #{@fullName}\n"
@@ -63,27 +64,26 @@ class Finance
 		print "-"*@@width + "\n"
 	end
 
-	def payrollDeductions
+	def deductions
 		print " "*@@header + "PAYROLL DEDUCTIONS\n"
 		print "-"*@@width + "\n"
 		print " "*@@indent + "Gross Income: $#{@income}\n"
 		print " "*@@indent + "CPP Premiums: $#{@cpp.premium.round}\n"
 		print " "*@@indent + "EI Premiums: $#{@ei.premium.round}\n"
-		print " "*@@indent + "Tax (Provincial): $#{@provincialTax}\n"
-		print " "*@@indent + "Tax (Federal): $#{@federalTax}\n"
-		print " "*@@indent + "Net Income: $#{@netincome}\n"
+		print " "*@@indent + "Tax (Provincial): $#{@taxes.incomeTax(@province)}\n"
+		print " "*@@indent + "Tax (Federal): $#{@taxes.incomeTax("Federal")}\n"
+		print " "*@@indent + "Net Income: $#{@income - @cpp.premium - @ei.premium - @taxes.incomeTax(@province) - @taxes.incomeTax("Federal")}\n"
 		print "-"*@@width + "\n"
 	end
 
-	def payrollDeductionsPercent
-		decimals = decimals.to_i
+	def deductionsPercent
 		print " "*@@header + "PAYROLL DEDUCTIONS (%)\n"
 		print "-"*@@width + "\n"
 		print " "*@@indent + "CPP Premiums: #{(@cpp.premium*100/@income).round(2)}%\n"
 		print " "*@@indent + "EI Premiums: #{(@ei.premium*100/@income).round(2)}%\n"
-		print " "*@@indent + "Tax (Provincial): #{(@provincialTax*100/@income).round(2)}%\n"
-		print " "*@@indent + "Tax (Federal): #{(@federalTax*100/@income).round(2)}%\n"
-		print " "*@@indent + "Net Income: #{(@netincome*100/@income).round(2)}%\n"
+		print " "*@@indent + "Tax (Provincial): #{(@taxes.incomeTax(@province)*100/@income).round(2)}%\n"
+		print " "*@@indent + "Tax (Federal): #{(@taxes.incomeTax("Federal")*100/@income).round(2)}%\n"
+		print " "*@@indent + "Net Income: #{((@income - @cpp.premium - @ei.premium - @taxes.incomeTax(@province) - @taxes.incomeTax("Federal"))*100/@income).round(2)}%\n"
 		print "-"*@@width + "\n"
 	end
 
@@ -97,20 +97,10 @@ class Finance
 		print "-"*@@width + "\n"
 	end
 
-	def taxPersonal
+	def taxSummary
 		print " "*@@header + "TAX INFORMATION\n"
 		print "-"*@@width + "\n"
 		print " "*@@indent + "Total: $#{@rrsp.deduction.round}\n"
-		print " "*@@indent + "Average Rate: $#{@tfsa.contribution.round}\n"
-		print " "*@@indent + "Marginal Rate: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
-		print " "*@@indent + "Tax Bracket: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
-		print "-"*@@width + "\n"
-	end
-
-	def taxProvincial
-		print " "*@@header + "TAX INFORMATION\n"
-		print "-"*@@width + "\n"
-		print " "*@@indent + "Total: $#{@provincialTax}\n"
 		print " "*@@indent + "Average Rate: $#{@tfsa.contribution.round}\n"
 		print " "*@@indent + "Marginal Rate: $#{@rrsp.deduction.round + @tfsa.contribution.round}\n"
 		print " "*@@indent + "Tax Bracket: #{((@rrsp.deduction + @tfsa.contribution)*100/(@income - (@cpp.premium + @ei.premium + @taxes.incomeTax(@province) + @taxes.incomeTax("Federal")))).round(2)}%\n"
@@ -173,6 +163,7 @@ class RRSP
 end
 
 class TFSA
+	attr_accessor :age
 
 	def initialize(age)
 		@age = age.to_i
@@ -205,13 +196,14 @@ class TFSA
 end
 
 class Taxes
+	attr_accessor :income,:province
 
-	def initialize(income, province)
+	def initialize (income, province)
 		@income = income
 		@province = province
 	end
 
-	def bracket
+	def taxBracket
 		k = 0
 
 		while k < @@taxRates2013[@province].length
@@ -225,37 +217,39 @@ class Taxes
 		return k
 	end
 
-	def incomeTax
+	def incomeTax (userProvince)
 		i = 0
 		incomeTax = 0
 		incomeSum = 0
+		bracket = taxBracket
 
-		if @income < @@taxBasic2013[@province]
+		if @income < @@taxBasic2013[userProvince]
 		 	incomeTax = 0
 
-		elsif @province == "AB"
-			incomeTax = @income*@@taxRates2013[@province][0][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
-		elsif @income <= @@taxRates2013[@province][-1][1]
+		elsif userProvince == "AB"
+			incomeTax = @@taxRates2013[userProvince][0][0]*(@income - @@taxBasic2013[userProvince])
+
+		elsif @income <= @@taxRates2013[userProvince][-1][1]
 			while i < bracket - 1
-				if @income > @@taxRates2013[@province][i][0]
-					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
-					incomeSum += @@taxRates2013[@province][i][1]
+				if @income > @@taxRates2013[userProvince][i][0]
+					incomeTax += @@taxRates2013[userProvince][i][0]*@@taxRates2013[userProvince][i][1]
+					incomeSum += @@taxRates2013[userProvince][i][1]
 					i +=1
 				else
-					incomeTax += (@@taxRates2013[@province][i][0]*(@income - incomeSum) - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0])
+					incomeTax += (@@taxRates2013[userProvince][i][0]*(@income - incomeSum) - @@taxBasic2013[userProvince]*@@taxRates2013[userProvince][0][0])
 				end
 			end
 
 		else
 			incomeSum = @income
 			while i < bracket - 1
-				if incomeSum > @@taxRates2013[@province][i][1]
-					incomeTax += @@taxRates2013[@province][i][0]*@@taxRates2013[@province][i][1]
-					incomeSum -= @@taxRates2013[@province][i][1]
+				if incomeSum > @@taxRates2013[userProvince][i][1]
+					incomeTax += @@taxRates2013[userProvince][i][0]*@@taxRates2013[userProvince][i][1]
+					incomeSum -= @@taxRates2013[userProvince][i][1]
 					i += 1
 				end
 			end
-			incomeTax += incomeCount*@@taxRates2013[@province][-1][0] - @@taxBasic2013[@province]*@@taxRates2013[@province][0][0]
+			incomeTax += incomeSum*@@taxRates2013[userProvince][-1][0] - @@taxBasic2013[userProvince]*@@taxRates2013[userProvince][0][0]
 		end
 
 		return incomeTax
@@ -268,12 +262,13 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "35", "M", "YT", 40000)
-puts finance.income
-puts finance.ei.premium.round
-finance.update(100000)
-puts finance.income
-puts finance.ei.premium.round
+finance = Finance.new("Peter", "Pan", "35", "M", "ON", 40000)
+puts "\nINCOME: #{finance.taxes.income}"
+puts finance.ei.premium
+puts finance.cpp.premium
 
-
+finance2 = Finance.new("Peter", "Pan", "35", "M", "ON", 100000)
+puts "\nINCOME: #{finance2.taxes.income}"
+puts finance2.ei.premium
+puts finance2.cpp.premium
 
