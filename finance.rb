@@ -114,15 +114,9 @@ class CPP
 	def initialize (income)
 		@income = income
 	end
+
 	def premium
-		premium = 0
-		if @income < $cppMinimum[$year]
-			premium = 0
-		elsif @income < $YMPE[$year]
-			premium = (@income - $cppMinimum[$year])*$cppRate[$year]
-		else
-			premium = ($YMPE[$year] - $cppMinimum[$year])*$cppRate[$year]
-		end
+		@income > $cppMinimum[$year] ? premium = $cppRate[$year]*[@income - $cppMinimum[$year], $YMPE[$year] - $cppMinimum[$year]].min : premium = 0
 		return premium
 	end
 end
@@ -166,20 +160,14 @@ class TFSA
 	end
 
 	def contributionTotal
-		contributionTotal = 0
-		i = $year.to_i
-		j = @age
+		@age < 18 ? contributionYear = nil : contributionYear = [2009, $year.to_i - (@age - 18)].max
+		sum = 0
 
-		if @age < 18
-			return "Sorry, you must be 18 years of age to contribute to your TFSA."
-		else
-			while i >= 2009 && j >= 18
-				contributionTotal += $tfsaAmount[i.to_s]
-				i -= 1
-				j -= 1
-			end
-			return contributionTotal
+		while contributionYear <= $year.to_i
+			sum += $tfsaAmount[contributionYear.to_s]
+			contributionYear += 1
 		end
+		return sum
 	end
 end
 
@@ -212,11 +200,12 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "22", "M", "ON", 10000)
-puts finance.ei.premium
+finance = Finance.new("Peter", "Pan", "23", "M", "ON", 10000)
+# puts finance.ei.premium
 puts finance.tfsa.contribution
+# puts finance.cpp.premium
 finance.update(40000)
-puts finance.ei.premium
+# puts finance.ei.premium
 puts finance.tfsa.contribution
 puts finance.tfsa.contributionTotal
 
