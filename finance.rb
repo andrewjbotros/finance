@@ -204,18 +204,14 @@ class Taxes
 	end
 
 	def taxBracket
-		k = 0
 
-		while k < @@taxRates2013[@province].length
-			if @income < @@taxRates2013[@province][k][1]
-				return k + 1
+		(0..@@taxRates2013(@province).length).each do |i|
+			if @income < @@taxRates2013[@province][i][1]
+				return i
 			else
-				k += 1
+				return @@taxRates2013(@province).length - 1
 			end
 		end
-
-		return k
-	end
 
 	def incomeTax (userProvince)
 		i = 0
@@ -262,13 +258,7 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "35", "M", "ON", 40000)
-puts "\nINCOME: #{finance.taxes.income}"
-puts finance.ei.premium
-puts finance.cpp.premium
+finance = Finance.new("Peter", "Pan", "35", "M", "ON", 60000)
+puts finance.deductions
 
-finance2 = Finance.new("Peter", "Pan", "35", "M", "ON", 100000)
-puts "\nINCOME: #{finance2.taxes.income}"
-puts finance2.ei.premium
-puts finance2.cpp.premium
 
