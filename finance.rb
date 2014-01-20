@@ -165,6 +165,7 @@ class TFSA
 	end
 
 	def contributionTotal
+		(@age - 18) - (@@year - 2009)
 		contributionRoom = 0
 		count = @age
 
