@@ -146,9 +146,9 @@ class RRSP
 		@income = income
 	end
 
-	def deduction
-  		@income*@@rrspRate[@@year] < @@rrspMax[@@year] ? deduction = @income*@@eiRate[@@year] : deduction = @@eiMax[@@year]*@@eiRate[@@year]
-  		return deduction
+	def contribution
+  		@income*@@rrspRate[@@year] < @@rrspMax[@@year] ? contribution = @income*@@eiRate[@@year] : contribution = @@eiMax[@@year]*@@eiRate[@@year]
+  		return contribution
 	end
 end
 
@@ -160,17 +160,16 @@ class TFSA
 	end
 
 	def contribution
-		if @age < 18
-			return 0
-		else
-			return @@tfsaAmount[@@year.to_s]
-		end
+		@age < 18 ? contribution = 0 : contribution = @@tfsaAmount[@@year.to_s]
+		return contribution
 	end
 
 	def contributionTotal
 		contributionRoom = 0
 		count = @age
-		year = @@currentYear.to_i
+
+		#How old were you in 2009? Current age - (Current Year - 2009)
+		(Current Year - 2009) * @@tfsaAmount[@@year]
 
 		if @age < 18
 			return "Sorry, you must be 18 years of age to contribute to your TFSA."
@@ -216,8 +215,8 @@ end
 
 finance = Finance.new("Peter", "Pan", "35", "M", "ON", 10000)
 puts finance.ei.premium
+puts finance.tfsa.contribution
 finance.update(40000)
 puts finance.ei.premium
-finance.update(100000)
-puts finance.ei.premium
+puts finance.tfsa.contribution
 
