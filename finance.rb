@@ -179,16 +179,26 @@ class Taxes
 		@province = province
 	end
 
+
 	#create a new array, and make the income bracket cumulative (instead of additive)
 	#compare the income against each cumulative amount, and return the tax bracket
 	#take the marginal product of the rate and the cap, ending with the rate times remaining income
 
 	def incomeTax
 
-		incomeTax = $taxRates2013.sort
-		incomeTax.each do | item, price |
-  			puts "#{item}: $#{price}"
-		end
+		incomeTax = Hash.new
+		incomeTax = @taxRates2013
+		puts incomeTax.is_a?("Hash")
+
+# 		incomeTax.each do | item, price |
+# 			sum +=
+#   			puts "#{item}: $#{price}"
+# 		end
+
+# 		sum = 0
+# students.each do |key, value|
+# 	sum += value.to_i
+# end
 		# sum = 0
 		# (0...$taxRates2013[@province].length).each do |i|
 		# 	sum += $taxRates2013[@province][i][1]
