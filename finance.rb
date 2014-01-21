@@ -179,18 +179,27 @@ class Taxes
 		@province = province
 	end
 
+	#create a new array, and make the income bracket cumulative (instead of additive)
+	#compare the income against each cumulative amount, and return the tax bracket
+	#take the marginal product of the rate and the cap, ending with the rate times remaining income
+
 	def incomeTax
-		sum = 0
-		(0...$taxRates2013[@province].length).each do |i|
-			sum += $taxRates2013[@province][i][1]
-			puts "#{sum}"
-			if @income < sum
-				bracket = i + 1
-			else
-				bracket = $taxRates2013[@province].length - 1
-			end
-			return bracket
+
+		incomeTax = $taxRates2013.sort
+		incomeTax.each do | item, price |
+  			puts "#{item}: $#{price}"
 		end
+		# sum = 0
+		# (0...$taxRates2013[@province].length).each do |i|
+		# 	sum += $taxRates2013[@province][i][1]
+		# 	puts "#{sum}"
+		# 	if @income < sum
+		# 		bracket = i + 1
+		# 	else
+		# 		bracket = $taxRates2013[@province].length - 1
+		# 	end
+		# 	return bracket
+		# end
 	end
 end
 
@@ -202,10 +211,4 @@ end
 
 finance = Finance.new("Peter", "Pan", "23", "M", "ON", 10000)
 # puts finance.ei.premium
-puts finance.tfsa.contribution
-# puts finance.cpp.premium
-finance.update(40000)
-# puts finance.ei.premium
-puts finance.tfsa.contribution
-puts finance.tfsa.contributionTotal
-
+finance.taxes.incomeTax

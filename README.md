@@ -1,4 +1,14 @@
-finance
+Personal Finance 2.0 (Canada)
 =======
 
-This is the beginning of a tool to calculate various financial things Canadians should know.
+Employment Insurance (EI)
+ei.premium = "Employment Insurance Premium"
+
+Canada Pension Plan (CPP)
+cpp.premium = "Canada Pension Plan Premium"
+
+Registered Retirement Savings (RRSP)
+rrsp.contribution = "Registered Retirement Savings Contribution"
+
+Tax Free Savings Account (TFSA)
+tfsa.contribution = "Tax Free Savings Account Contribution"
