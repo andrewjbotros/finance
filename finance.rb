@@ -185,31 +185,25 @@ class Taxes
 	#take the marginal product of the rate and the cap, ending with the rate times remaining income
 
 	def incomeTax
+		rates = $taxRates2013
 
-		incomeTax = Hash.new
-		incomeTax = @taxRates2013
-		puts incomeTax.is_a?("Hash")
+		$taxRates2013.each do |province, bracket|
+			sum = 0
+			(0...bracket.length).each do |i|
+				sum += bracket[i][1]
+				rates[province][i][1] = sum
+			end
+		end
 
-# 		incomeTax.each do | item, price |
-# 			sum +=
-#   			puts "#{item}: $#{price}"
-# 		end
-
-# 		sum = 0
-# students.each do |key, value|
-# 	sum += value.to_i
-# end
-		# sum = 0
-		# (0...$taxRates2013[@province].length).each do |i|
-		# 	sum += $taxRates2013[@province][i][1]
-		# 	puts "#{sum}"
-		# 	if @income < sum
-		# 		bracket = i + 1
-		# 	else
-		# 		bracket = $taxRates2013[@province].length - 1
-		# 	end
-		# 	return bracket
-		# end
+		rates.each do |province, bracket|
+			(0...bracket.length).each do |i|
+				if @income < bracket[i][1].to_f
+					return "#{i}"
+				else
+					puts "#{rates[@province].length}"
+				end
+			end
+		end
 	end
 end
 
@@ -219,6 +213,5 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "23", "M", "ON", 10000)
-# puts finance.ei.premium
+finance = Finance.new("Peter", "Pan", "23", "M", "ON", 150000)
 finance.taxes.incomeTax

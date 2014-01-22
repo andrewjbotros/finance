@@ -81,7 +81,6 @@ $rrspRate["2013"] = 0.18
 #           ##########################################################
 
 $tfsaAmount = {}
-$tfsaAmount["data"] = "Contribution Limit"
 $tfsaAmount["2014"] = 5500
 $tfsaAmount["2013"] = 5500
 $tfsaAmount["2012"] = 5000
@@ -93,7 +92,6 @@ $tfsaAmount["2009"] = 5000
 #           ##########################################################
 
 $taxRates2013 = {}
-$taxRates2013["data"] = ["Marginal Tax Rate", "Marginal Income Bracket"]
 $taxRates2013["AB"] = [[0.10, 17593]]
 $taxRates2013["BC"] = [[0.0506, 37568],[0.077, 37570],[0.105, 11130],[0.1229, 18486],[0.147, 104754]]
 $taxRates2013["Federal"] = [[0.15, 43561], [0.22, 43562], [0.26, 47931], [0.29, 135054]]
@@ -110,7 +108,6 @@ $taxRates2013["SK"] = [[0.11, 42906], [0.13, 79683], [0.15, 122589]]
 $taxRates2013["YT"] = [[0.0704, 43561], [0.0968, 43562], [0.1144, 47931], [0.1276, 135054]]
 
 $taxBasic2013 = {}
-$taxBasic2013["data"] = ["Basic Personal Amount"]
 $taxBasic2013["AB"] = 17593
 $taxBasic2013["BC"] = 10276
 $taxBasic2013["Federal"] = 11038
