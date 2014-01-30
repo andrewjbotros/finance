@@ -9,4 +9,8 @@ class EI
   		@income < $eiMax[$year] ? premium = @income*$eiRate[$year] : premium = $eiMax[$year]*$eiRate[$year]
   		return premium
 	end
+
+	def rate
+		return $eiRate[$year]
+	end
 end

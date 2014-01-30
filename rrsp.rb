@@ -9,4 +9,8 @@ class RRSP
   		@income < $rrspMax[$year] ? contribution = @income*$rrspRate[$year] : contribution = $rrspRate[$year]*$rrspMax[$year]
   		return contribution
 	end
+
+	def rate
+		return $rrspRate[$year]
+	end
 end

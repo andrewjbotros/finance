@@ -1,4 +1,4 @@
-class Profile
+class User
 	attr_accessor :id,:first_name,:last_name,:email,:age,:sex,:province,:income
 
 	def initialize (id, first_name, last_name, email, age, sex, province, income)
