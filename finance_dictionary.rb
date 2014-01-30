@@ -31,12 +31,12 @@ $cppRate = {}
 $cppRate["2014"] = 0.0495
 $cppRate["2013"] = 0.0495
 
-$cppMinimum = {}
-$cppMinimum["2014"] = 3500
-$cppMinimum["2013"] = 3500
-$cppMinimum["2012"] = 3500
-$cppMinimum["2011"] = 3500
-$cppMinimum["2010"] = 3500
+$cppMin = {}
+$cppMin["2014"] = 3500
+$cppMin["2013"] = 3500
+$cppMin["2012"] = 3500
+$cppMin["2011"] = 3500
+$cppMin["2010"] = 3500
 
 
 $YMPE={}

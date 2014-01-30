@@ -6,7 +6,7 @@ class CPP
 	end
 
 	def premium
-		@income > $cppMinimum[$year] ? premium = $cppRate[$year]*[@income - $cppMinimum[$year], $YMPE[$year] - $cppMinimum[$year]].min : premium = 0
+		@income > $cppMin[$year] ? premium = $cppRate[$year]*[@income - $cppMin[$year], $YMPE[$year] - $cppMin[$year]].min : premium = 0
 		return premium
 	end
 end

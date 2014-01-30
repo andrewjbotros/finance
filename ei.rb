@@ -1,7 +1,7 @@
 class EI
 	attr_accessor :income
 
-	def initialize(income)
+	def initialize (income)
 		@income = income
 	end
 
