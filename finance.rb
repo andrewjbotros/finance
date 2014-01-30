@@ -14,6 +14,7 @@ require 'csv'
 #           ##########################################################
 
 require_relative 'finance_dictionary'
+require_relative 'profile'
 require_relative 'ei'
 require_relative 'cpp'
 require_relative 'rrsp'
@@ -119,7 +120,7 @@ end
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "23", "M", "ON", 3600)
+finance = Finance.new("Peter", "Pan", "23", "M", "ON", 150000)
 puts finance.ei.premium
 puts finance.cpp.premium
 puts finance.rrsp.contribution
