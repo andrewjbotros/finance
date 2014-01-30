@@ -14,6 +14,11 @@ require 'csv'
 #           ##########################################################
 
 require_relative 'finance_dictionary'
+require_relative 'ei'
+require_relative 'cpp'
+require_relative 'rrsp'
+require_relative 'taxes'
+require_relative 'tfsa'
 
 #           ##########################################################
 #           ##############                             ###############
@@ -108,110 +113,15 @@ class Finance
 	end
 end
 
-class CPP
-	attr_accessor :income
-
-	def initialize (income)
-		@income = income
-	end
-
-	def premium
-		@income > $cppMinimum[$year] ? premium = $cppRate[$year]*[@income - $cppMinimum[$year], $YMPE[$year] - $cppMinimum[$year]].min : premium = 0
-		return premium
-	end
-end
-
-class EI
-	attr_accessor :income
-
-	def initialize(income)
-		@income = income
-	end
-
-	def premium
-  		@income < $eiMax[$year] ? premium = @income*$eiRate[$year] : premium = $eiMax[$year]*$eiRate[$year]
-  		return premium
-	end
-end
-
-class RRSP
-	attr_accessor :income
-
-	def initialize (income)
-		@income = income
-	end
-
-	def contribution
-  		@income*$rrspRate[$year] < $rrspMax[$year] ? contribution = @income*$eiRate[$year] : contribution = $eiMax[$year]*$eiRate[$year]
-  		return contribution
-	end
-end
-
-class TFSA
-	attr_accessor :age
-
-	def initialize(age)
-		@age = age.to_i
-	end
-
-	def contribution
-		@age < 18 ? contribution = 0 : contribution = $tfsaAmount[$year.to_s]
-		return contribution
-	end
-
-	def contributionTotal
-		@age < 18 ? contributionYear = nil : contributionYear = [2009, $year.to_i - (@age - 18)].max
-		sum = 0
-
-		while contributionYear <= $year.to_i
-			sum += $tfsaAmount[contributionYear.to_s]
-			contributionYear += 1
-		end
-		return sum
-	end
-end
-
-class Taxes
-	attr_accessor :income,:province
-
-	def initialize (income, province)
-		@income = income
-		@province = province
-	end
-
-
-	#create a new array, and make the income bracket cumulative (instead of additive)
-	#compare the income against each cumulative amount, and return the tax bracket
-	#take the marginal product of the rate and the cap, ending with the rate times remaining income
-
-	def incomeTax
-		rates = $taxRates2013
-
-		$taxRates2013.each do |province, bracket|
-			sum = 0
-			(0...bracket.length).each do |i|
-				sum += bracket[i][1]
-				rates[province][i][1] = sum
-			end
-		end
-
-		rates.each do |province, bracket|
-			(0...bracket.length).each do |i|
-				if @income < bracket[i][1].to_f
-					return "#{i}"
-				else
-					puts "#{rates[@province].length}"
-				end
-			end
-		end
-	end
-end
-
 #           ##########################################################
 #           ##############        CREATE NEW USER;     ###############
 #           ##############         PRINT RESULTS       ###############
 #           ##############           (testing)         ###############
 #           ##########################################################
 
-finance = Finance.new("Peter", "Pan", "23", "M", "ON", 150000)
-finance.taxes.incomeTax
+finance = Finance.new("Peter", "Pan", "23", "M", "ON", 3600)
+puts finance.ei.premium
+puts finance.cpp.premium
+puts finance.rrsp.contribution
+finance.info
+finance.deductionsPercent

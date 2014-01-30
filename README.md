@@ -1,6 +1,3 @@
-Personal Finance 2.0 (Canada)
-=======
-
 Employment Insurance (EI)
 Canada Pension Plan (CPP)
 Registered Retirement Savings (RRSP)
